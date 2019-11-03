@@ -1,0 +1,76 @@
+---
+title: "TidyTuesday - NYC Squirrel Census"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmap)
+nyc_squirrels <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-29/nyc_squirrels.csv")
+```
+
+```{r}
+nyc_squirrels %>% kable()
+```
+
+```{r}
+nyc_squirrels_data <- nyc_squirrels %>% 
+  filter( !is.na(primary_fur_color) ) %>%
+  group_by(hectare,primary_fur_color) %>% 
+  summarise(
+    lat  = mean(lat),
+    long = mean(long),
+    n = n()
+  ) %>% 
+  filter(n>2)
+```
+
+```{r}
+register_google(key = "AIzaSyAP_iKRdusP-In12FJVzNiMsAvzMIibBac", account_type = "standard")
+
+# Get map at zoom level 5: map_5
+cp_cord <- geocode("central park, New york")
+cp_map  <- get_map(
+  cp_cord, zoom = 14, 
+  maptype = "roadmap",
+  source = "google",
+  color="bw"
+  )
+
+# Plot map at zoom level 5
+ggmap(cp_map,
+  base_layer = ggplot(
+    data = nyc_squirrels_data,
+    aes(long,lat,color=primary_fur_color,fill=primary_fur_color,size=n))
+  )+
+  geom_point(alpha=0.4)+
+  facet_wrap(~primary_fur_color, ncol = 2) +
+  theme_light()+
+  labs(
+    title    = "Squirrel in New York Central Park",
+    subtitle = "- splitted by fur color -",
+    fill     = "Fur color",
+    size     = "Number of squirrel (per hectare)",
+    color    = "Fur color"
+  )+
+  theme(
+    plot.title   = element_text(size = 13, face = "bold"),
+    legend.title = element_text(size=10), 
+    legend.text  = element_text(size=9),
+    axis.title.x = element_blank(),
+    axis.text.x  = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+
+
+```
+
+
