@@ -30,7 +30,7 @@ nyc_squirrels_data <- nyc_squirrels %>%
 ```
 
 ```{r}
-register_google(key = "AIzaSyAP_iKRdusP-In12FJVzNiMsAvzMIibBac", account_type = "standard")
+register_google(key = "---", account_type = "standard")
 
 # Get map at zoom level 5: map_5
 cp_cord <- geocode("central park, New york")
